@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Booking Result Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input, button {
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 5px 10px;
+    }
+    #result {
+      white-space: pre-wrap;
+      background-color: #f4f4f4;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .top-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Fetch Booking Result</h2>
+
+  <label for="bookingId">Enter Booking ID:</label>
+  <input type="text" id="bookingId" placeholder="e.g. 4980258988">
+  <button onclick="fetchBooking()">Get Booking</button>
+
+  <div class="top-controls">
+    <button onclick="copyResult()">📋 Copy JSON</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    let latestResult = '';
+
+    function fetchBooking() {
+      const bookingId = document.getElementById("bookingId").value.trim();
+      if (!bookingId) {
+        alert("Please enter a booking ID.");
+        return;
+      }
+
+      const url = `https://www.eglobe-solutions.com/webapichannelmanager/bookings_v2/vAKdYUDIX6q4Q3jkw6Cq/${bookingId}`;
+
+      fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer POKDF34FGV',
+          'Providercode': 'pYDcVbgviAOyXjaXsarT'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data && !data.IsError && data.Result) {
+          latestResult = JSON.stringify(data.Result, null, 2);
+          document.getElementById("result").textContent = latestResult;
+        } else {
+          document.getElementById("result").textContent = "No valid result found.";
+          latestResult = '';
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        document.getElementById("result").textContent = "Error fetching booking data.";
+      });
+    }
+
+    function copyResult() {
+      if (!latestResult) {
+        alert("No result to copy.");
+        return;
+      }
+
+      navigator.clipboard.writeText(latestResult)
+        .then(() => alert("Result copied to clipboard!"))
+        .catch(err => alert("Failed to copy: " + err));
+    }
+  </script>
+
+</body>
+</html>
